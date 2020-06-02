@@ -6,6 +6,7 @@ const session =require("client-sessions");
 const DButils = require("../tables/DButils");
 const app = express();
 authentication_route = require("../routing/authentication");
+recipes_route = require("../routing/recipes")
 var port = process.env.PORT || "3000";
 
 app.use(
@@ -37,6 +38,7 @@ app.use(function (req, res, next)
     next();
   }
 });
+app.use("/recipes",recipes_route);
 app.use(authentication_route);
 
 app.use(function (err, req, res, next) {
