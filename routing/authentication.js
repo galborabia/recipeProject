@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
-const DButils = require("../tables/DButils");
-const DBOperation = require("../tables/dbOperation");
+const DButils = require("../modules/DB");
+const DBOperation = require("../modules/dbOperation");
 const bcrypt = require("bcrypt");
 
 router.post("/login", async function(req, res, next) {
@@ -43,5 +43,6 @@ router.post("/register",async function (req, res)
         res.status(201).send("user created successfully");
     }
  });
+
 
  module.exports = router;

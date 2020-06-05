@@ -1,92 +1,65 @@
 var express = require("express");
 var router = express.Router();
-const axios = require("axios");
+var recipesHandler=require("./utils/recipesHandler");
 
-const api_domain = "https://api.spoonacular.com/recipes";
 
-router.get("/exploreRecipes", async (req, res, next) => {
+router.get("/Information", async function (req, res, next) {
+  try
+  {
+    const recipe = await recipesHandler.getRecipeInfo(req.query.recipe_id);
+    const fullRecipe=recipesHandler.getFullRecipe(recipe);
+    req.session.fullRecipe=fullRecipe;
+    if(req.session && req.session.user_id){
+       res.redirect('/profile/getRecipeInfo');
+    }
+    else{
+      res.status(200).send({ fullRecipe: fullRecipe });
+    }
+  } catch (error)
+  {
+    next(error);
+  }
+});
+
+
+
+
+router.get("/exploreRecipes", async function (req, res, next) {
   try
    {
-    const recipe = await getRandomRecipes();
-    res.send({ data: recipe.data });
+    let randomRecipes = await recipesHandler.getRandomRecipes();
+    let randomPreviewRecipes = recipesHandler.createRandomRecipes(randomRecipes.data.recipes);
+    res.status(200).send({previewRecipes: randomPreviewRecipes });
    }
     catch (error) {
     next(error);
   }
 });
 
-//#region example1 - make serach endpoint
-router.get("/search", async function(req, res, next)
+
+router.get("/search",async function(req, res, next)
 {
   try {
-    
-    const search_response = await searchRecipe(req.query);
-    let recipes = await Promise.all(
-        search_response.data.results.map((recipe_raw) =>
-          getRecipeInfo(recipe_raw.id)
-        )
-      );
-    let mapRecipes = recipes.map((recipe) => recipe.data);
-    res.send({ data: mapRecipes });
+    const search_response = await recipesHandler.searchRecipe(req.query);
+    if(search_response.data.results.length === 0)
+    {
+        return res.sendStatus(404);
+    }
+    else 
+    {
+        let recipes = await Promise.all(
+            search_response.data.results.map((recipe_raw) =>
+            recipesHandler.getRecipeInfo(recipe_raw.id)
+            )
+          );
+        let previewRecipes=recipesHandler.getPreviewRecipes(recipes);
+        res.status(200).send({ previewRecipes: previewRecipes });   
+    }
+
+  
   } catch (error) {
     next(error);
   }
 });
-//#endregion
-
-function getRandomRecipes() {
-  return axios.get(`${api_domain}/random`, {
-    params: {
-        limitLicense: true,
-        number:3,
-        apiKey: process.env.spooncular_apiKey
-    }
-  });
-}
-
-function searchRecipe(queryParams)
- {
-    const name=queryParams.query;
-    let cuisine="";
-    let diet="";
-    let amount=5;
-    let intolerance="";
-    if(queryParams.cuisine !== undefined) 
-    {
-        cuisine=queryParams.cuisine;
-    }
-    if(queryParams.diet !==undefined)
-    {
-        diet=queryParams.diet;
-    }
-    if(queryParams.amount !==undefined)
-    {
-        amount=queryParams.amount;
-    }
-    if(queryParams.intolerance !==undefined)
-    {
-        intolerance=queryParams.intolerance;
-    }
-    return axios.get(`${api_domain}/search`, {
-      params: {
-          query: name,
-          cuisine: cuisine,
-          diet: diet,
-          intolerance: intolerance,
-          number: amount,
-          instructionsRequired: true,
-          apiKey: process.env.spooncular_apiKey
-      }
-    });
-  }
-  function getRecipeInfo(id) {
-    return axios.get(`${api_domain}/${id}/information`, {
-      params: {
-        includeNutrition: false,
-        apiKey: process.env.spooncular_apiKey
-      }
-    });
-  }
-
-
+ 
 module.exports = router;
