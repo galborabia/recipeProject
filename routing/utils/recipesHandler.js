@@ -36,6 +36,7 @@ exports.getFullRecipe =function getFullRecipe(recipe)
     fullRecipe.instructions=getRecipeInstructions(recipe);
     return fullRecipe;
 }
+
 function getRecipeIngredients(recipe)
 {
     let recipeIngredients=recipe.data.extendedIngredients.map(createIngredients);
