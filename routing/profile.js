@@ -36,20 +36,24 @@ router.get("/getWatchsAndFavorite/",authentic,async function (req, res, next) {
   res.send( watchs_list );
 });
 
-router.get("/getPersonalRecipes", function (req, res) {
-  res.send(req.originalUrl);
+router.get("/getPersonalRecipes", authentic,async function (req, res,next) {
+  const personalRecipes = await profileHandler.getPersonalPreviewRecipeWithWatchFave(req.session.user_id, next)
+  .catch(err=>next(err));
+  
+  res.status(200).send({ personalRecipes: personalRecipes });
 });
 
-router.get("/getPersonalRecipes/:id", function (req, res) {
-  res.send(req.originalUrl);
+router.get("/getFamilyRecipes/:id", async function (req, res, next) {
+  const { id } = req.params;
+  const fullRecipe= await profileHandler.getFamilyFullRecipe(req.session.user_id,id, next).catch(err=>next(err));
+  res.status(200).send({ fullRecipe: fullRecipe });
 });
 
-router.get("/getFamilyRecipes", function (req, res) {
-  res.send(req.originalUrl);
-});
-
-router.get("/getFamilyRecipes/:id", function (req, res) {
-  res.send(req.originalUrl);
+router.get("/getFamilyRecipes",async function (req, res, next) {
+  const familyRecipes = await profileHandler.getFamilyPreviewRecipeWithWatchFavorite(req.session.user_id, next)
+  .catch(err=>next(err));
+  
+  res.status(200).send({ familyRecipes: familyRecipes });
 });
 
 router.get("/getRecipeInfo", authentic, async function(req, res,next)

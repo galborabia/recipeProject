@@ -77,6 +77,7 @@ async function updateLastRecipes(recipe)
     `Update UserLastRecipes SET counter= '${recipe.counter}' where user_id='${recipe.user_id}' AND recipe_id='${recipe.recipe_id}' `
      );
 }
+
 function changeOrder(lastRecipes, recipe_id)
 {
   let recipes = new Array();
@@ -165,7 +166,19 @@ exports.getLastRecipes =async function getLastRecipes(user_id, next)
 {
   try{
       return await DButils.execQuery(
-        `SELECT * FROM UsersLastRecipes WHERE user_id = '${user_id}'`
+        `SELECT * FROM UsersLastRecipes WHERE user_id = '${user_id}'`);
+      }
+      catch (err) {
+        console.error("SQL error", err);
+        throw err;
+    }
+};
+
+exports.getPersonalPreviousRecipes =async function getPersonalPreviousRecipes(user_id, next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM previewRecipes WHERE user_id = '${user_id}'`
       );
     }
     catch (err) {
@@ -173,3 +186,76 @@ exports.getLastRecipes =async function getLastRecipes(user_id, next)
     throw err;
   }
 };
+
+
+exports.getFamilyPreviousRecipes =async function getFamilyPreviousRecipes(user_id, next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM familyPreviewRecipes WHERE user_id = '${user_id}'`
+      );
+    }
+    catch (err) {
+    console.error("SQL error", err);
+    throw err;
+    }
+};
+
+exports.getPersonalPreviousRecipe =async function getPersonalPreviousRecipe(user_id, recipe_id,next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM previewRecipes WHERE user_id = '${user_id}' AND id = '${recipe_id}'`
+      );
+    }
+    catch (err) {
+    console.error("SQL error", err);
+    throw err;
+  }
+};
+
+exports.getFamilyFullRecipe =async function getFamilyFullRecipe(user_id, recipe_id,next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM familyPreviewRecipes WHERE user_id = '${user_id}' AND id = '${recipe_id}'`
+      );
+    }
+    catch (err) {
+    console.error("SQL error", err);
+    throw err;
+  }
+};
+
+
+
+exports.getIngredientsRecipe =async function getIngredientsRecipe(recipe_id, next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM ingredients WHERE id = '${recipe_id}'`
+      );
+    }
+    catch (err) {
+    console.error("SQL error", err);
+    throw err;
+  }
+};
+
+exports.getInstructionsRecipe =async function getInstructionsRecipe(recipe_id, next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM instructions WHERE id = '${recipe_id}'`
+      );
+    }
+    catch (err) {
+    console.error("SQL error", err);
+    throw err;
+    }
+};
+
+
+
+
+
