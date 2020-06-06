@@ -6,7 +6,7 @@ var recipesHandler=require("./utils/recipesHandler");
 router.get("/Information", async function (req, res, next) {
   try
   {
-    const recipe = await recipesHandler.getRecipeInfo(req.query.recipe_id);
+    const recipe = await recipesHandler.getRecipeInfo(req.query.id);
     const fullRecipe=recipesHandler.getFullRecipe(recipe);
     req.session.fullRecipe=fullRecipe;
     if(req.session && req.session.user_id){
@@ -41,12 +41,12 @@ router.get("/search",async function(req, res, next)
 {
   try 
   {
-    if(req.query && req.query !=="")
+    if(req.query && req.query.query !=="")
     {
       const search_response = await recipesHandler.searchRecipe(req.query);
       if(search_response.data.results.length === 0)
       {
-          return res.sendStatus(404);
+          return res.status(404).send({message:"Recipe not found"});
       }
       else 
       {

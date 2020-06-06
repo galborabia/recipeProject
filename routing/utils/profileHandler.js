@@ -66,11 +66,14 @@ exports.getPersonalFullRecipe= async function getPersonalFullRecipe(user_id,reci
 
 exports.getFamilyFullRecipe= async function getFamilyFullRecipe(user_id,recipe_id,next){
     let fullRecipe = new Object();
-    const ingredients=  await DBOperation.getIngredientsRecipe(recipe_id);
-    const instructions=  await DBOperation.getInstructionsRecipe(recipe_id);
     const FamilyFullRecipe = await DBOperation.getFamilyFullRecipe(user_id,recipe_id);
+    if(FamilyFullRecipe.length===0)
+    {
+        return fullRecipe;
+    }
+    const ingredients = await DBOperation.getIngredientsRecipe(recipe_id);
+    const instructions = await DBOperation.getInstructionsRecipe(recipe_id);
     const watchAndFavorite= await getWatchAndFavorite(user_id, recipe_id);
-
     FamilyFullRecipe[0].watch= watchAndFavorite.watch;
     FamilyFullRecipe[0].favorite= watchAndFavorite.favorite;
     fullRecipe.previewRecipe=FamilyFullRecipe;

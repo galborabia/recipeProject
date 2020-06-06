@@ -8,7 +8,7 @@ var profileHandler=require("./utils/profileHandler");
 router.post("/login", async function(req, res, next) {
     try
     {
-      const user = await DButils.execQuery(`SELECT * FROM users WHERE username = '${req.body.username}'`);
+      const user = await DButils.execQuery(`SELECT * FROM Users WHERE username = '${req.body.username}'`);
       if (!user.find((x) => x.username === req.body.username))
         throw { status: 401, message: "Username or Password incorrect" };
       // check that the password is correct

@@ -166,7 +166,7 @@ exports.getLastRecipes =async function getLastRecipes(user_id, next)
 {
   try{
       return await DButils.execQuery(
-        `SELECT * FROM UsersLastRecipes WHERE user_id = '${user_id}'`);
+        `SELECT * FROM UserLastRecipes WHERE user_id = '${user_id}'`);
       }
       catch (err) {
         console.error("SQL error", err);
@@ -216,6 +216,7 @@ exports.getPersonalPreviousRecipe =async function getPersonalPreviousRecipe(user
 
 exports.getFamilyFullRecipe =async function getFamilyFullRecipe(user_id, recipe_id,next)
 {
+  //let userGuid = new Guid(user_id);
   try{
       return await DButils.execQuery(
         `SELECT * FROM familyPreviewRecipes WHERE user_id = '${user_id}' AND id = '${recipe_id}'`
