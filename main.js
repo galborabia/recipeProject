@@ -5,7 +5,6 @@ const session = require("client-sessions");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const DButils = require("./modules/DB");
-
 const user = require("./routing/user");
 const profile = require("./routing/profile");
 const recipes = require("./routing/recipes");
@@ -57,7 +56,7 @@ app.use(authentication);
 // error middleware- with 4 params
 app.use(function (err, req, res, next) {
     console.error(err);
-    res.status(err.response.status || 500).send({ message: err.message, success: false });
+    res.status(err.status || 500).send({ message: err.message, success: false });
   });
   
   const server = app.listen(port, () => {

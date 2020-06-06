@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 var recipesHandler=require("./utils/recipesHandler");
 
-
+// get full recipe by recipe_id
 router.get("/Information", async function (req, res, next) {
   try
   {
@@ -23,7 +23,7 @@ router.get("/Information", async function (req, res, next) {
 
 
 
-
+// get 3 random preview recipes 
 router.get("/exploreRecipes", async function (req, res, next) {
   try
    {
@@ -36,27 +36,34 @@ router.get("/exploreRecipes", async function (req, res, next) {
   }
 });
 
-
+// search for recipes by food name
 router.get("/search",async function(req, res, next)
 {
-  try {
-    const search_response = await recipesHandler.searchRecipe(req.query);
-    if(search_response.data.results.length === 0)
+  try 
+  {
+    if(req.query && req.query !=="")
     {
-        return res.sendStatus(404);
+      const search_response = await recipesHandler.searchRecipe(req.query);
+      if(search_response.data.results.length === 0)
+      {
+          return res.sendStatus(404);
+      }
+      else 
+      {
+          let recipes = await Promise.all(
+              search_response.data.results.map((recipe_raw) =>
+              recipesHandler.getRecipeInfo(recipe_raw.id)
+              )
+            );
+          let previewRecipes=recipesHandler.getPreviewRecipes(recipes);
+          res.status(200).send({ previewRecipes: previewRecipes });   
+      }
     }
-    else 
+    else
     {
-        let recipes = await Promise.all(
-            search_response.data.results.map((recipe_raw) =>
-            recipesHandler.getRecipeInfo(recipe_raw.id)
-            )
-          );
-        let previewRecipes=recipesHandler.getPreviewRecipes(recipes);
-        res.status(200).send({ previewRecipes: previewRecipes });   
+      throw {status: 400, message: "Invalid request query is empty or undefined "};
     }
-
-  
+   
   } catch (error) {
     next(error);
   }

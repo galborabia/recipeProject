@@ -21,6 +21,7 @@ exports.createRandomRecipes = function createRandomRecipes(randomRecipes)
     return searchRandomRecipesAgain();
 }
 
+
 function searchRandomRecipesAgain()
 {
     let recipes = getRandomRecipes();
@@ -146,7 +147,7 @@ exports.searchRecipe = function searchRecipe(queryParams)
     });
   }
 
-  exports.getRecipeInfo=function getRecipeInfo(id) {
+  exports.getRecipeInfo = function getRecipeInfo(id) {
     return axios.get(`${api_domain}/${id}/information`, {
       params: {
         includeNutrition: false,
