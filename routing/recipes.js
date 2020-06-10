@@ -10,7 +10,7 @@ router.get("/Information", async function (req, res, next) {
     const fullRecipe=recipesHandler.getFullRecipe(recipe);
     req.session.fullRecipe=fullRecipe;
     if(req.session && req.session.user_id){
-       res.redirect('/profile/getRecipeInfo');
+       res.redirect('/profile/RecipeInfo');
     }
     else{
       res.status(200).send({ fullRecipe: fullRecipe });
@@ -27,9 +27,17 @@ router.get("/Information", async function (req, res, next) {
 router.get("/exploreRecipes", async function (req, res, next) {
   try
    {
-    let randomRecipes = await recipesHandler.getRandomRecipes();
-    let randomPreviewRecipes = recipesHandler.createRandomRecipes(randomRecipes.data.recipes);
-    res.status(200).send({previewRecipes: randomPreviewRecipes });
+      let randomRecipes = await recipesHandler.getRandomRecipes();
+      let randomPreviewRecipes = recipesHandler.createRandomRecipes(randomRecipes.data.recipes);
+      if(req.session && req.session.user_id)
+      {
+        req.session.previewRecipes=randomPreviewRecipes;
+        res.redirect('/profile/recipesProfile');
+      }
+      else
+      {
+        res.status(200).send({ previewRecipes: previewRecipes });
+      }  
    }
     catch (error) {
     next(error);
@@ -56,7 +64,15 @@ router.get("/search",async function(req, res, next)
               )
             );
           let previewRecipes=recipesHandler.getPreviewRecipes(recipes);
-          res.status(200).send({ previewRecipes: previewRecipes });   
+          if(req.session && req.session.user_id)
+          {
+            req.session.previewRecipes=previewRecipes;
+            res.redirect('/profile/recipesProfile');
+          }
+         else
+          {
+           res.status(200).send({ previewRecipes: previewRecipes });
+          }  
       }
     }
     else

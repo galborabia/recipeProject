@@ -7,9 +7,18 @@ var profileHandler=require("./utils/profileHandler");
 
 router.post("/favorites/:id", authentic, async function(req, res,next){
   const { id } = req.params;
-   DBOperation.addRecipeToFavorit(req.session.user_id, id,next).
-   then(res.send({ message: "addRecipeToFavorit" ,success:true }))
-   .catch(err=>next(err));
+  try
+  {
+    if(await  DBOperation.addRecipeToFavorit(req.session.user_id, id,next))
+    {
+      res.send({ message: "addRecipeToFavorit" ,success:true });
+    }
+  }
+  catch(err)
+  {
+    next(err);
+  }
+  
 });
 
 router.get("/favorites" ,authentic,async function (req, res, next)
@@ -24,6 +33,7 @@ router.get("/favorites" ,authentic,async function (req, res, next)
   {
     favorites.map((fave)=>favorites_list.push(fave.recipe_id));
     let previewRecipes =await profileHandler.getPreviewRecipes(favorites_list);
+    await profileHandler.getWatchAndFavorite(req.session.user_id,previewRecipes);
     res.send({previewRecipes: previewRecipes});
   }
 });
@@ -40,6 +50,7 @@ router.get("/watched",authentic,async function (req, res, next)
   {
     watchs.map((watch)=>watchs_list.push(watch.recipe_id));
     let previewRecipes= await profileHandler.getPreviewRecipes(watchs_list)
+    await profileHandler.getWatchAndFavorite(req.session.user_id,previewRecipes);
     res.send({previewRecipes: previewRecipes});
   }
 });
@@ -56,21 +67,35 @@ router.get("/lastRecipes",authentic,async function (req, res, next)
   else
   {
     watchs.map((watch)=>watchs_list.push(watch.recipe_id));
-    let previewRecipes= await profileHandler.getPreviewRecipes(watchs_list)
+    let previewRecipes= await profileHandler.getPreviewRecipes(watchs_list);
+    await profileHandler.getWatchAndFavorite(req.session.user_id,previewRecipes);
     res.send({previewRecipes: previewRecipes} );
   } 
 });
 
+router.get("/personalRecipes/:id",authentic, async function (req, res, next) {
+  const { id } = req.params;
+  const fullRecipe= await profileHandler.getPersonalFullRecipe(req.session.user_id,id, next).catch(err=>next(err));
+  res.status(200).send({ fullRecipe: fullRecipe });
+
+});
+
+
 router.get("/personalRecipes", authentic,async function (req, res,next) {
-  const personalRecipes = await profileHandler.getPersonalPreviewRecipeWithWatchFave(req.session.user_id, next)
-  .catch(err=>next(err));
-  if(personalRecipes.length===0)
-  {
-    res.status(201).send({message: "no personal recipes for user"});
+  try{
+    const personalRecipes = await profileHandler.getPersonalPreviewRecipes(req.session.user_id, next);
+    if(personalRecipes.length===0)
+    {
+      res.status(201).send({message: "no personal recipes for user"});
+    }
+    else
+    {
+      res.status(200).send({ personalRecipes: personalRecipes });
+    }
   }
-  else
+  catch(err)
   {
-    res.status(200).send({ personalRecipes: personalRecipes });
+    next(err);
   }
 });
 
@@ -84,11 +109,10 @@ router.get("/familyRecipes",authentic,async function (req, res, next)
  {
    try
   {
-    const familyRecipes = await profileHandler.getFamilyPreviewRecipeWithWatchFavorite(req.session.user_id, next)
-    .catch(err=>next(err));
-    if(familyRecipes.previewRecipe=== undefined)
+    const familyRecipes = await profileHandler.getFamilyPreviewRecipes(req.session.user_id, next);
+    if(familyRecipes.length ===0)
     {
-      res.status(201).send({message: "no personal recipes for user"});
+      res.status(201).send({message: "no family recipes for user"});
     }
     else
     {
@@ -101,12 +125,26 @@ router.get("/familyRecipes",authentic,async function (req, res, next)
   }
 });
 
-router.get("/getRecipeInfo", authentic, async function(req, res,next)
+router.get("/RecipeInfo", authentic, async function(req, res,next)
 {
   let recipe_id =req.session.fullRecipe.previewRecipe.recipe_id;
   await DBOperation.watchUpdate(req.session.user_id, recipe_id,next).catch(err=>next(err));
   await DBOperation.addRecipeToLastRecipes(req.session.user_id, recipe_id,next).catch(err=>next(err));
-  res.status(200).send({ fullRecipe: req.session.fullRecipe });
+  let fullRecipe = await profileHandler.checkFavorite(req.session.user_id,req.session.fullRecipe);
+  res.status(200).send({ fullRecipe: fullRecipe });
+});
+
+router.get("/recipesProfile",authentic, async function(req, res,next)
+{
+  try
+  {
+    await profileHandler.getWatchAndFavorite(req.session.user_id,req.session.previewRecipes);
+    res.status(200).send({previewRecipes: req.session.previewRecipes})
+  }
+  catch(err)
+  {
+    next(err);
+  }
 });
 
 

@@ -3,7 +3,7 @@ var router = express.Router();
 const DButils = require("../modules/DB");
 const DBOperation = require("../modules/dbOperation");
 const bcrypt = require("bcrypt");
-var profileHandler=require("./utils/profileHandler");
+var userHandler=require("./utils/userHandler");
 
 router.post("/login", async function(req, res, next) {
     try
@@ -18,7 +18,7 @@ router.post("/login", async function(req, res, next) {
         }
       // Set cookie
       req.session.user_id = user[0].user_id;
-      res.status(200).send({ message: "login succeeded", success: true });
+      res.status(200).send({ message: "login succeeded", success: true, first_name:user[0].first_name, last_name:user[0].last_name });
     }
     catch (error)
     {
@@ -33,12 +33,12 @@ router.post("/register",async function (req, res,next)
     {
       throw {status: 400, message: "Invalid request username must be 3-8 chracter"};
     }  
-    if(req.body.email !==undefined && await DBOperation.checkIfUserExists(req.body.username))
+    if(req.body.email !==undefined && await DBOperation.checkIfUserExists(req.body.username,req.body.email,next))
     {
-      if(req.body.password && profileHandler.checkPassword(req.body.password))
+      if(req.body.password && userHandler.checkPassword(req.body.password))
       {
         await DBOperation.createUser(req.body);
-        res.status(201).send("user created successfully");
+        res.status(201).send({message: "user created successfully"});
       }
       else
       {

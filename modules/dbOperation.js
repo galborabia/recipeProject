@@ -117,10 +117,11 @@ exports.watchUpdate =async function watchUpdate(user_id, recipe_id,next)
         );
       }
   }
-    catch (err) {
+    catch (err)
+    {
       console.error("SQL error", err);
       throw err;
-  }
+    }
 };
 
 exports.addRecipeToFavorit =async function addRecipeToFavorit(user_id, recipe_id,next)
@@ -129,9 +130,10 @@ exports.addRecipeToFavorit =async function addRecipeToFavorit(user_id, recipe_id
       await DButils.execQuery(
         `INSERT INTO UsersFavoriteRecipes VALUES ('${user_id}', '${recipe_id}')`
       );
+      return true;
     }
-    catch (err) {
-    console.error("SQL error", err);
+    catch (err)
+    {
     throw err;
   }
 };
@@ -181,10 +183,11 @@ exports.getPersonalPreviousRecipes =async function getPersonalPreviousRecipes(us
         `SELECT * FROM previewRecipes WHERE user_id = '${user_id}'`
       );
     }
-    catch (err) {
-    console.error("SQL error", err);
-    throw err;
-  }
+    catch (err)
+    {
+      console.error("SQL error", err);
+      next(err);
+    }
 };
 
 

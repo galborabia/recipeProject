@@ -13,24 +13,26 @@ const authentication = require("./routing/authentication");
 var app = express();
 
 app.use(express.json()); // parse application/json
+app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
+app.use(express.static(path.join(__dirname, "public"))); //To serve static files such as images, CSS files, and JavaScript files
+app.use(morgan(":method :url :status  :response-time ms"));
+
 app.use(
   session({
     cookieName: "session", // the cookie key name
     secret: process.env.COOKIE_SECRET, // the encryption key
-    duration: 20 * 60 * 1000, // expired after 20 sec
+    duration: 200 * 60 * 1000, // expired after 20 sec
     activeDuration: 0 // if expiresIn < activeDuration,
     //the session will be extended by activeDuration milliseconds
   })
 );
-app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
-app.use(express.static(path.join(__dirname, "public"))); //To serve static files such as images, CSS files, and JavaScript files
-app.use(morgan(":method :url :status  :response-time ms"));
+
 
 var port = process.env.PORT || "3000";
 app.use("/user", user);
 app.use("/recipes", recipes);
 app.use("/profile", profile);
-app.use(authentication);
+app.use("",authentication);
 //#region cookie middleware
 app.use(function (req, res, next) {
   if (req.session && req.session.user_id) {
