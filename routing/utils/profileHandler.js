@@ -1,6 +1,7 @@
 var recipesHandler=require("./recipesHandler");
 const DBOperation = require("../../modules/dbOperation");
 
+// get all the preview recipes of a connected user
 exports.getPreviewRecipes = async function getPreviewRecipes (recipes)
 {
     let recipesData = await Promise.all(
@@ -10,6 +11,7 @@ exports.getPreviewRecipes = async function getPreviewRecipes (recipes)
     return previewRecipes;
 }
 
+// add to recipes list- if each one of them was watched or favorite
  async function getWatchAndFavorite(user_id,recipes)
  {
     const watch=  await DBOperation.getWatchs(user_id);
@@ -33,6 +35,7 @@ exports.getPreviewRecipes = async function getPreviewRecipes (recipes)
     }   
 }
 
+// check if a certain recipe is in favorites
 exports.checkFavorite = async function checkFavorite(user_id,recipe)
 {
     const favorite=  await DBOperation.getFavorite(user_id);
@@ -50,6 +53,7 @@ exports.checkFavorite = async function checkFavorite(user_id,recipe)
     return recipe;
 }
 
+// return full personal recipe details
 exports.getPersonalFullRecipe= async function getPersonalFullRecipe(user_id,recipe_id,next)
 {
     let fullRecipe = new Object();
@@ -62,7 +66,7 @@ exports.getPersonalFullRecipe= async function getPersonalFullRecipe(user_id,reci
     return fullRecipe;
 }
 
-
+// return full family recipe details
 exports.getFamilyFullRecipe= async function getFamilyFullRecipe(user_id,recipe_id,next){
     let fullRecipe = new Object();
     const FamilyFullRecipe = await DBOperation.getFamilyFullRecipe(user_id,recipe_id);
@@ -81,6 +85,8 @@ exports.getFamilyFullRecipe= async function getFamilyFullRecipe(user_id,recipe_i
     return fullRecipe;
 }
 
+
+// get personal preview recipe detalis
 async function getPersonalPreviewRecipes(user_id,next)
 {
     let personalRecipes = await DBOperation.getPersonalPreviousRecipes(user_id, next);
@@ -90,7 +96,7 @@ async function getPersonalPreviewRecipes(user_id,next)
 }
 
 
-
+// get family preview recipe detalis
 async function getFamilyPreviewRecipes(user_id,next)
 {
     let personalRecipes = await DBOperation.getFamilyPreviousRecipes(user_id, next);
@@ -98,6 +104,8 @@ async function getFamilyPreviewRecipes(user_id,next)
     //await getWatchAndFavorite(user_id,personalRecipes);
     return personalRecipes;
 }
+
+
 exports.getWatchAndFavorite = getWatchAndFavorite;
 exports.getPersonalPreviewRecipes=getPersonalPreviewRecipes; 
 exports.getFamilyPreviewRecipes= getFamilyPreviewRecipes;

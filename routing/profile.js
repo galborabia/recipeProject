@@ -4,7 +4,7 @@ const authentic= require("./utils/authentic");
 const DBOperation = require("../modules/dbOperation");
 var profileHandler=require("./utils/profileHandler");
 
-
+// add to user favorite recipes
 router.post("/favorites/:id", authentic, async function(req, res,next){
   const { id } = req.params;
   try
@@ -21,6 +21,7 @@ router.post("/favorites/:id", authentic, async function(req, res,next){
   
 });
 
+// get all user favorite recipes
 router.get("/favorites" ,authentic,async function (req, res, next)
  {
   let favorites_list=[];
@@ -38,6 +39,7 @@ router.get("/favorites" ,authentic,async function (req, res, next)
   }
 });
 
+// get all user watched recipes
 router.get("/watched",authentic,async function (req, res, next)
 {
   let watchs_list=[];
@@ -55,7 +57,7 @@ router.get("/watched",authentic,async function (req, res, next)
   }
 });
 
-
+// get the last watched recipes of the certain logged in user
 router.get("/lastRecipes",authentic,async function (req, res, next)
 {
   let watchs_list=[];
@@ -73,14 +75,15 @@ router.get("/lastRecipes",authentic,async function (req, res, next)
   } 
 });
 
+// get a certain personal recipe by id of the certain logged in user
 router.get("/personalRecipes/:id",authentic, async function (req, res, next) {
   const { id } = req.params;
   const fullRecipe= await profileHandler.getPersonalFullRecipe(req.session.user_id,id, next).catch(err=>next(err));
-  res.status(200).send({ fullRecipe: fullRecipe });
+  res.status(200).send({ personalRecipe: fullRecipe });
 
 });
 
-
+// get all the personal recipes of the certain logged in user
 router.get("/personalRecipes", authentic,async function (req, res,next) {
   try{
     const personalRecipes = await profileHandler.getPersonalPreviewRecipes(req.session.user_id, next);
@@ -99,12 +102,14 @@ router.get("/personalRecipes", authentic,async function (req, res,next) {
   }
 });
 
+// get a certain family recipe by id of the certain logged in user
 router.get("/familyRecipes/:id", authentic, async function (req, res, next) {
   const { id } = req.params;
   const fullRecipe= await profileHandler.getFamilyFullRecipe(req.session.user_id,id, next).catch(err=>next(err));
-  res.status(200).send({ fullRecipe: fullRecipe });
+  res.status(200).send({ familyRecipe: fullRecipe });
 });
 
+// get all the family recipes of the certain logged in user
 router.get("/familyRecipes",authentic,async function (req, res, next)
  {
    try
@@ -125,6 +130,7 @@ router.get("/familyRecipes",authentic,async function (req, res, next)
   }
 });
 
+// return the full recipe details - and add to watched table and last recipes table
 router.get("/RecipeInfo", authentic, async function(req, res,next)
 {
   let recipe_id =req.session.fullRecipe.previewRecipe.recipe_id;
@@ -134,6 +140,7 @@ router.get("/RecipeInfo", authentic, async function(req, res,next)
   res.status(200).send({ fullRecipe: fullRecipe });
 });
 
+// get all the previews recipes of the certain logged in user
 router.get("/recipesProfile",authentic, async function(req, res,next)
 {
   try

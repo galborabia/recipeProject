@@ -1,6 +1,7 @@
 const axios = require("axios");
 const api_domain = "https://api.spoonacular.com/recipes";
 
+// return from sponcolar api 3 random recipes
 exports.createRandomRecipes = function createRandomRecipes(randomRecipes)
 {
     let randomPreview =[];
@@ -21,13 +22,14 @@ exports.createRandomRecipes = function createRandomRecipes(randomRecipes)
     return searchRandomRecipesAgain();
 }
 
-
+// call random recipe function to raffle more 3 recipes
 function searchRandomRecipesAgain()
 {
     let recipes = getRandomRecipes();
     return createRandomRecipes(recipes);
 }
 
+// get full details of certain recipe- from sponcolat api 
 exports.getFullRecipe =function getFullRecipe(recipe)
 {
     let fullRecipe = new Object();
@@ -38,12 +40,14 @@ exports.getFullRecipe =function getFullRecipe(recipe)
     return fullRecipe;
 }
 
+// get all the ingredients for certain recipe
 function getRecipeIngredients(recipe)
 {
     let recipeIngredients=recipe.data.extendedIngredients.map(createIngredients);
     return recipeIngredients;
 }
 
+// return the ingredient for certain recipe in a certain format
 function createIngredients(ingredients)
 {
     let recipeIngredients = new Object();
@@ -53,12 +57,14 @@ function createIngredients(ingredients)
     return recipeIngredients;
 }
 
+// get all the instructions for certain recipe
 function getRecipeInstructions(recipe)
 {
     let instructions=recipe.data.analyzedInstructions.map(createInstruction);
     return instructions;
 }
 
+// return the instructions for certain recipe in a certain format
 function createInstruction (instructions)
 {
     let instructionsPhase = new Object();
@@ -66,6 +72,9 @@ function createInstruction (instructions)
     instructionsPhase.steps=instructions.steps.map(getInstructionSteps);
     return instructionsPhase;
 }
+
+// get instrutctions by steps- 
+//  for each step returns: number, description, equipment, ingredients
 function getInstructionSteps (instructions)
 {
     let recipeInstruction = new Object();
@@ -76,6 +85,7 @@ function getInstructionSteps (instructions)
     return recipeInstruction;
 }
 
+// return the preview recipe for a lot of recipes in a certain format
 exports.getPreviewRecipes = function getPreviewRecipes(recipes)
 {
     let previreRecipes=new Array();
@@ -87,6 +97,7 @@ exports.getPreviewRecipes = function getPreviewRecipes(recipes)
     return previreRecipes;
 } 
 
+// return the preview recipe for certain recipe in a certain format
 function createPreviewRecipe(value)
 {
     let previewRecipe = new Object();
@@ -104,6 +115,7 @@ function createPreviewRecipe(value)
 }
 exports.createPreviewRecipe=createPreviewRecipe;
 
+// get random recipe from api sponcolar 
 exports.getRandomRecipes = function getRandomRecipes() {
   return axios.get(`${api_domain}/random`, {
     params: {
@@ -114,6 +126,7 @@ exports.getRandomRecipes = function getRandomRecipes() {
   });
 }
 
+// search recipe by name - search in api sponcolar
 exports.searchRecipe = function searchRecipe(queryParams)
 {
     if(!queryParams.query || queryParams.query ==="" )
@@ -154,6 +167,7 @@ exports.searchRecipe = function searchRecipe(queryParams)
     });
   }
 
+  // return the recipe details for certain recipe id
   exports.getRecipeInfo = function getRecipeInfo(id) {
     return axios.get(`${api_domain}/${id}/information`, {
       params: {

@@ -5,6 +5,7 @@ const DBOperation = require("../modules/dbOperation");
 const bcrypt = require("bcrypt");
 var userHandler=require("./utils/userHandler");
 
+//login route - get username and password
 router.post("/login", async function(req, res, next) {
     try
     {
@@ -26,6 +27,7 @@ router.post("/login", async function(req, res, next) {
     }
   });
 
+  //register route - get username, first_name, last_name, country ,password, email and profile_picture
 router.post("/register",async function (req, res,next)
  {
    try{
@@ -56,5 +58,22 @@ router.post("/register",async function (req, res,next)
    }
  });
 
+  //logout route
+ router.get("/logout", async function(req, res, next) {
+  try
+  {
+    if (req.session.user_id!=undefined){
+      req.session.user_id= undefined;
+      res.status(200).send({ message: "logout succeeded", success: true });   
+    }
+    else{
+      res.status(409).send({ message: "alredy logout", success: false});
+    }
+  }
+  catch (error)
+  {
+    next(error);
+  }
+});
 
  module.exports = router;

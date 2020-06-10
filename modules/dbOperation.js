@@ -1,6 +1,7 @@
 const DButils = require("./DB");
 const bcrypt = require("bcrypt");
 
+// create new user in Users table
 exports.createUser =async function createUser(user)
 {
     let hashPassword=bcrypt.hashSync(user.password,parseInt(process.env.bcrypt_saltRounds)) ;
@@ -9,6 +10,7 @@ exports.createUser =async function createUser(user)
       );
 };
 
+// check if user exists in Users table
 exports.checkIfUserExists = async function checkIfUserExists (username,email,next)
 {
   try{
@@ -25,6 +27,8 @@ exports.checkIfUserExists = async function checkIfUserExists (username,email,nex
   }
  
 }
+
+// check if recipe exists in recipes
 function checkIfExists(recipes, recipe_id)
 {
   for (i = 0; i < recipes.length; i++)
@@ -37,6 +41,7 @@ function checkIfExists(recipes, recipe_id)
   return false;
 }
 
+// add recipe to last recipe table for 3 last recipes
 exports.addRecipeToLastRecipes =async function addRecipeToLastRecipes(user_id, recipe_id,next)
 {
   try
@@ -71,6 +76,7 @@ exports.addRecipeToLastRecipes =async function addRecipeToLastRecipes(user_id, r
   }
 };
 
+// get recipe and update last recipes table
 async function updateLastRecipes(recipe)
 {
   await DButils.execQuery(
@@ -78,6 +84,7 @@ async function updateLastRecipes(recipe)
      );
 }
 
+// change order of last recipe to save the last current recipe 
 function changeOrder(lastRecipes, recipe_id)
 {
   let recipes = new Array();
@@ -103,7 +110,7 @@ function changeOrder(lastRecipes, recipe_id)
 }
 
 
-
+// update the current recipe to be opened (get full recipe) - update wathces table
 exports.watchUpdate =async function watchUpdate(user_id, recipe_id,next)
 {
   try{
@@ -124,6 +131,7 @@ exports.watchUpdate =async function watchUpdate(user_id, recipe_id,next)
     }
 };
 
+// add recipe to favorite table
 exports.addRecipeToFavorit =async function addRecipeToFavorit(user_id, recipe_id,next)
 {
   try{
@@ -138,6 +146,7 @@ exports.addRecipeToFavorit =async function addRecipeToFavorit(user_id, recipe_id
   }
 };
 
+// get favorite of user from user favorite table
 exports.getFavorite =async function getFavorite(user_id, next)
 {
   try{
@@ -151,6 +160,7 @@ exports.getFavorite =async function getFavorite(user_id, next)
   }
 };
 
+// get watched recipes of user from user watched recipes table
 exports.getWatchs =async function getWatchs(user_id, next)
 {
   try{
@@ -164,6 +174,7 @@ exports.getWatchs =async function getWatchs(user_id, next)
   }
 };
 
+// get last recipes from user last recipes table
 exports.getLastRecipes =async function getLastRecipes(user_id, next)
 {
   try{
@@ -176,6 +187,7 @@ exports.getLastRecipes =async function getLastRecipes(user_id, next)
     }
 };
 
+// get the personal recipes in a preview recipes view
 exports.getPersonalPreviousRecipes =async function getPersonalPreviousRecipes(user_id, next)
 {
   try{
@@ -190,7 +202,7 @@ exports.getPersonalPreviousRecipes =async function getPersonalPreviousRecipes(us
     }
 };
 
-
+// get the family recipes in a preview recipes view
 exports.getFamilyPreviousRecipes =async function getFamilyPreviousRecipes(user_id, next)
 {
   try{
@@ -204,6 +216,7 @@ exports.getFamilyPreviousRecipes =async function getFamilyPreviousRecipes(user_i
     }
 };
 
+// get the family recipes in a preview recipes view
 exports.getPersonalPreviousRecipe =async function getPersonalPreviousRecipe(user_id, recipe_id,next)
 {
   try{
@@ -217,6 +230,7 @@ exports.getPersonalPreviousRecipe =async function getPersonalPreviousRecipe(user
   }
 };
 
+// get the family recipes with the full details
 exports.getFamilyFullRecipe =async function getFamilyFullRecipe(user_id, recipe_id,next)
 {
   //let userGuid = new Guid(user_id);
@@ -232,7 +246,7 @@ exports.getFamilyFullRecipe =async function getFamilyFullRecipe(user_id, recipe_
 };
 
 
-
+// get the ingredirents of a recipe
 exports.getIngredientsRecipe =async function getIngredientsRecipe(recipe_id, next)
 {
   try{
@@ -246,6 +260,7 @@ exports.getIngredientsRecipe =async function getIngredientsRecipe(recipe_id, nex
   }
 };
 
+// get the instruction of a recipe
 exports.getInstructionsRecipe =async function getInstructionsRecipe(recipe_id, next)
 {
   try{

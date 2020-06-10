@@ -5,13 +5,14 @@ const session = require("client-sessions");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const DButils = require("./modules/DB");
-const user = require("./routing/user");
 const profile = require("./routing/profile");
 const recipes = require("./routing/recipes");
 const authentication = require("./routing/authentication");
+const cors = require("cors");
 
 var app = express();
 
+app.use(cors());
 app.use(express.json()); // parse application/json
 app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(express.static(path.join(__dirname, "public"))); //To serve static files such as images, CSS files, and JavaScript files
@@ -29,26 +30,9 @@ app.use(
 
 
 var port = process.env.PORT || "3000";
-app.use("/user", user);
 app.use("/recipes", recipes);
 app.use("/profile", profile);
 app.use("",authentication);
-//#region cookie middleware
-app.use(function (req, res, next) {
-  if (req.session && req.session.user_id) {
-    DButils.execQuery("SELECT user_id FROM Users")
-      .then((users) => {
-        if (users.find((x) => x.user_id === req.session.user_id)) {
-          req.user_id = req.session.user_id;
-        }
-        next();
-      })
-      .catch((error) => next());
-  } else {
-    next();
-  }
-});
-
 
 
 

@@ -1,5 +1,7 @@
 
 const DButils = require("../../modules/DB");
+
+//authentic function for all the login functions
 module.exports= async (req, res, next) => {
     if(req.session && req.session.user_id)
     {
