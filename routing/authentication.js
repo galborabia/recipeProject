@@ -3,11 +3,12 @@ var router = express.Router();
 const DButils = require("../modules/DB");
 const DBOperation = require("../modules/dbOperation");
 const bcrypt = require("bcrypt");
+var userHandler=require("./utils/userHandler");
 
 router.post("/login", async function(req, res, next) {
     try
     {
-      const user = await DButils.execQuery(`SELECT * FROM users WHERE username = '${req.body.username}'`);
+      const user = await DButils.execQuery(`SELECT * FROM Users WHERE username = '${req.body.username}'`);
       if (!user.find((x) => x.username === req.body.username))
         throw { status: 401, message: "Username or Password incorrect" };
       // check that the password is correct
@@ -15,10 +16,9 @@ router.post("/login", async function(req, res, next) {
         {
         throw { status: 401, message: "Username or Password incorrect" };
         }
-  
       // Set cookie
       req.session.user_id = user[0].user_id;
-      res.status(200).send({ message: "login succeeded", success: true });
+      res.status(200).send({ message: "login succeeded", success: true, first_name:user[0].first_name, last_name:user[0].last_name });
     }
     catch (error)
     {
@@ -26,22 +26,34 @@ router.post("/login", async function(req, res, next) {
     }
   });
 
-router.post("/register",async function (req, res)
+router.post("/register",async function (req, res,next)
  {
-    const users =await DButils.execQuery("SELECT username FROM Users").catch((err) => {
-        if (err.code) console.log("error message:", err.code);
-        else console.log("error message:", err);
-      });
-    if(users.find((x) => x.username===req.body.username))
+   try{
+    if(req.body.username === undefined || req.body.username.length<3 || req.body.username>8)
     {
-        res.status(409).send("username already exists, please try diffrent one");
+      throw {status: 400, message: "Invalid request username must be 3-8 chracter"};
+    }  
+    if(req.body.email !==undefined && await DBOperation.checkIfUserExists(req.body.username,req.body.email,next))
+    {
+      if(req.body.password && userHandler.checkPassword(req.body.password))
+      {
+        await DBOperation.createUser(req.body);
+        res.status(201).send({message: "user created successfully"});
+      }
+      else
+      {
+        throw {status: 400, message: "Invalid request password must be 5-10 chracter and contains digit and special chracter"};
+      }
     }
     else
     {
-        DBOperation.createUser(req.body)
-        .catch(error => res.send(error));
-        res.status(201).send("user created successfully");
+      throw { status: 409, message: "Username or email taken, please try diffrent username or diffrent email" };
     }
+   }
+   catch(error)
+   {
+      next(error);
+   }
  });
 
 

@@ -9,17 +9,119 @@ exports.createUser =async function createUser(user)
       );
 };
 
-exports.watchUpdate =async function watchUpdate(user_id, recipe_id,next)
+exports.checkIfUserExists = async function checkIfUserExists (username,email,next)
 {
   try{
-      await DButils.execQuery(
-        `INSERT INTO UserswatchedRecipes VALUES ('${user_id}', '${recipe_id}')`
+    const users = await DButils.execQuery(`SELECT username FROM Users where username= '${username}' or email='${email}'`);
+    if(users && users.length>0)
+    {
+      return false;
+    }
+    return true;
+  }
+  catch(err)
+  {
+      next(err);
+  }
+ 
+}
+function checkIfExists(recipes, recipe_id)
+{
+  for (i = 0; i < recipes.length; i++)
+  {
+    if(parseInt(recipes[i].recipe_id) ===recipe_id) 
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+exports.addRecipeToLastRecipes =async function addRecipeToLastRecipes(user_id, recipe_id,next)
+{
+  try
+  {
+      let lastRecipes = await DButils.execQuery(
+        `Select * FROM UserLastRecipes where user_id='${user_id}' ORDER BY counter ASC `
       );
+      if(checkIfExists(lastRecipes,recipe_id) === true)
+      {
+         let recipes = changeOrder(lastRecipes, recipe_id);
+         recipes.forEach(updateLastRecipes);
+      }
+      else
+      {
+        if(lastRecipes.length==3)
+        {
+          await DButils.execQuery(
+            `Delete FROM UserLastRecipes where user_id='${user_id}' AND counter='3'`
+          );
+        }
+        await DButils.execQuery(
+          `INSERT INTO UserLastRecipes VALUES ('${user_id}', '${recipe_id}','0') `
+        );
+        await DButils.execQuery(
+          `Update UserLastRecipes SET counter= counter+1 where user_id='${user_id}'`
+        );
+      }
   }
     catch (err) {
       console.error("SQL error", err);
       throw err;
   }
+};
+
+async function updateLastRecipes(recipe)
+{
+  await DButils.execQuery(
+    `Update UserLastRecipes SET counter= '${recipe.counter}' where user_id='${recipe.user_id}' AND recipe_id='${recipe.recipe_id}' `
+     );
+}
+
+function changeOrder(lastRecipes, recipe_id)
+{
+  let recipes = new Array();
+  for (let index = 0; index < lastRecipes.length; index++)
+  {
+    if(parseInt(lastRecipes[index].recipe_id)===recipe_id)
+    {
+      lastRecipes[index].counter=1;
+      recipes.push(lastRecipes[index]);
+    }
+  }
+  let counter =2;
+  for (let index = 0; index < lastRecipes.length; index++)
+  {
+    if(parseInt(lastRecipes[index].recipe_id)!==recipe_id)
+    {
+      lastRecipes[index].counter=counter;
+      counter++;
+      recipes.push(lastRecipes[index]);
+    }
+  }
+  return recipes;
+}
+
+
+
+exports.watchUpdate =async function watchUpdate(user_id, recipe_id,next)
+{
+  try{
+      let recipe =await DButils.execQuery(
+        `SELECT * FROM UserswatchedRecipes where user_id='${user_id}' AND recipe_id='${recipe_id}'`
+      );
+      if(recipe.length === 0)
+      {
+        await DButils.execQuery(
+          `INSERT INTO UserswatchedRecipes VALUES ('${user_id}', '${recipe_id}')`
+        );
+      }
+  }
+    catch (err)
+    {
+      console.error("SQL error", err);
+      throw err;
+    }
 };
 
 exports.addRecipeToFavorit =async function addRecipeToFavorit(user_id, recipe_id,next)
@@ -28,9 +130,10 @@ exports.addRecipeToFavorit =async function addRecipeToFavorit(user_id, recipe_id
       await DButils.execQuery(
         `INSERT INTO UsersFavoriteRecipes VALUES ('${user_id}', '${recipe_id}')`
       );
+      return true;
     }
-    catch (err) {
-    console.error("SQL error", err);
+    catch (err)
+    {
     throw err;
   }
 };
@@ -61,6 +164,18 @@ exports.getWatchs =async function getWatchs(user_id, next)
   }
 };
 
+exports.getLastRecipes =async function getLastRecipes(user_id, next)
+{
+  try{
+      return await DButils.execQuery(
+        `SELECT * FROM UserLastRecipes WHERE user_id = '${user_id}'`);
+      }
+      catch (err) {
+        console.error("SQL error", err);
+        throw err;
+    }
+};
+
 exports.getPersonalPreviousRecipes =async function getPersonalPreviousRecipes(user_id, next)
 {
   try{
@@ -68,10 +183,11 @@ exports.getPersonalPreviousRecipes =async function getPersonalPreviousRecipes(us
         `SELECT * FROM previewRecipes WHERE user_id = '${user_id}'`
       );
     }
-    catch (err) {
-    console.error("SQL error", err);
-    throw err;
-  }
+    catch (err)
+    {
+      console.error("SQL error", err);
+      next(err);
+    }
 };
 
 
@@ -85,7 +201,7 @@ exports.getFamilyPreviousRecipes =async function getFamilyPreviousRecipes(user_i
     catch (err) {
     console.error("SQL error", err);
     throw err;
-  }
+    }
 };
 
 exports.getPersonalPreviousRecipe =async function getPersonalPreviousRecipe(user_id, recipe_id,next)
@@ -103,6 +219,7 @@ exports.getPersonalPreviousRecipe =async function getPersonalPreviousRecipe(user
 
 exports.getFamilyFullRecipe =async function getFamilyFullRecipe(user_id, recipe_id,next)
 {
+  //let userGuid = new Guid(user_id);
   try{
       return await DButils.execQuery(
         `SELECT * FROM familyPreviewRecipes WHERE user_id = '${user_id}' AND id = '${recipe_id}'`
@@ -139,7 +256,7 @@ exports.getInstructionsRecipe =async function getInstructionsRecipe(recipe_id, n
     catch (err) {
     console.error("SQL error", err);
     throw err;
-  }
+    }
 };
 
 

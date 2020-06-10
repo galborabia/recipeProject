@@ -21,6 +21,7 @@ exports.createRandomRecipes = function createRandomRecipes(randomRecipes)
     return searchRandomRecipesAgain();
 }
 
+
 function searchRandomRecipesAgain()
 {
     let recipes = getRandomRecipes();
@@ -60,7 +61,10 @@ function getRecipeInstructions(recipe)
 
 function createInstruction (instructions)
 {
-    return instructions.steps.map(getInstructionSteps);
+    let instructionsPhase = new Object();
+    instructionsPhase.name = instructions.name;
+    instructionsPhase.steps=instructions.steps.map(getInstructionSteps);
+    return instructionsPhase;
 }
 function getInstructionSteps (instructions)
 {
@@ -94,10 +98,13 @@ function createPreviewRecipe(value)
     previewRecipe.vegetarian=value.vegetarian;
     previewRecipe.glutenFree=value.glutenFree;
     previewRecipe.recipe_id=value.id;
+    previewRecipe.watch=false;
+    previewRecipe.favorite=false;
     return previewRecipe;
 }
+exports.createPreviewRecipe=createPreviewRecipe;
 
-exports. getRandomRecipes = function getRandomRecipes() {
+exports.getRandomRecipes = function getRandomRecipes() {
   return axios.get(`${api_domain}/random`, {
     params: {
         limitLicense: true,
@@ -147,7 +154,7 @@ exports.searchRecipe = function searchRecipe(queryParams)
     });
   }
 
-  exports.getRecipeInfo=function getRecipeInfo(id) {
+  exports.getRecipeInfo = function getRecipeInfo(id) {
     return axios.get(`${api_domain}/${id}/information`, {
       params: {
         includeNutrition: false,

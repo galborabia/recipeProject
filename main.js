@@ -5,40 +5,38 @@ const session = require("client-sessions");
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const DButils = require("./modules/DB");
-
 const user = require("./routing/user");
 const profile = require("./routing/profile");
 const recipes = require("./routing/recipes");
 const authentication = require("./routing/authentication");
 
 var app = express();
+
 app.use(express.json()); // parse application/json
-app.use(
-  session({
-    cookieName: "session", // the cookie key name
-    secret: process.env.COOKIE_SECRET, // the encryption key
-    duration: 20 * 60 * 1000, // expired after 20 sec
-    activeDuration: 0 // if expiresIn < activeDuration,
-    //the session will be extended by activeDuration milliseconds
-  })
-);
 app.use(express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(express.static(path.join(__dirname, "public"))); //To serve static files such as images, CSS files, and JavaScript files
 app.use(morgan(":method :url :status  :response-time ms"));
 
+app.use(
+  session({
+    cookieName: "session", // the cookie key name
+    secret: process.env.COOKIE_SECRET, // the encryption key
+    duration: 200 * 60 * 1000, // expired after 20 sec
+    activeDuration: 0 // if expiresIn < activeDuration,
+    //the session will be extended by activeDuration milliseconds
+  })
+);
+
+
 var port = process.env.PORT || "3000";
-
-app.get("/", (req, res) => res.send("welcome"));
-
 app.use("/user", user);
 app.use("/recipes", recipes);
 app.use("/profile", profile);
-app.use("/authentication", authentication);
-
+app.use("",authentication);
 //#region cookie middleware
 app.use(function (req, res, next) {
   if (req.session && req.session.user_id) {
-    DButils.execQuery("SELECT user_id FROM users")
+    DButils.execQuery("SELECT user_id FROM Users")
       .then((users) => {
         if (users.find((x) => x.user_id === req.session.user_id)) {
           req.user_id = req.session.user_id;
@@ -51,16 +49,17 @@ app.use(function (req, res, next) {
   }
 });
 
-app.use(authentication);
+
 
 
 // error middleware- with 4 params
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res, next) 
+{
     console.error(err);
-    res.status(err.response.status || 500).send({ message: err.message, success: false });
-  });
+    res.status(err.status || 500).send({ message: err.message, success: false });
+});
   
   const server = app.listen(port, () => {
-    console.log(`Server listen on port ${port}`);
+  console.log(`Server listen on port ${port}`);
   });
   
